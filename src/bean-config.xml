@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+     完成获取itemDao实例的配置
+     可以配置多个bean子目录，根据属性唯一标识id和class属性来区分
+     创建一个BeanFactory来解析此xml文件，也使用dom4j组件
+ -->
+ <beans>
+   <bean id="itemDao" class="com.xunpoit.impl.ItemDaoImpl4MySql"></bean>
+   <bean id="clientDao" class="com.xunpoit.impl.ItemDaoImpl4MySql"></bean>
+   <bean id="userDao" class="com.xunpoit.impl.ItemDaoImpl4MySql"></bean>
+   
+   <bean id="flowCardDao" class="com.xunpoit.flowcard.dao.FlowCardDao4MySql"></bean>
+   <!-- 
+      ItemManager类的配置
+    -->
+   <bean id="itemManager" class="com.xunpoit.manager.ItemManagerImpl"></bean>
+   <bean id="flowCardManager" class="com.xunpoit.flowcard.manager.FlowCardManagerImpl"></bean>
+ </beans>

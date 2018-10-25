@@ -1,0 +1,467 @@
+                                  ERP项目总结
+    第一周：
+  1.JavaWeb项目流程：
+  ①招标：竞标的时候，考虑成本（人力，硬件设施，时间），技术（以何种成熟的语言进行设计），安全性（合理合法）
+  ②详细的需求分析：功能需求（业务模式），详细设计（技术，框架，crud数据库，字段的选择）                                                                                 
+  ③详细设计阶段（文档帮助，画图演示）
+  ④完成代码设计
+  ⑤测试：基础测试（url，参数，bug），大数据测试，性能测试（白盒测试（根据代码分析来），黑盒测试（模拟客户的思路和操作来））
+  ⑥项目部署：java工程师和网络工程师一起部署
+  ⑦运维：版本升级
+  
+  2.数据库表的初始化，多张表的单位都是通过不同的name和category字段，设置在t_data_dict表中
+    
+  3.UML建模软件：用户用例图（某个角色的功能展示，管理员继承自普通的用户，泛化关系），时序图（代码实现的步骤），类图（属性，方法），配合一份详细需求设计文档.doc
+  
+  4.xml，可扩展标记语言：把数据库的信息配置到xml文件中，完成相应解析拿到数据
+    步骤：
+    ①新建一个xml文件，完成连接数据库信息的配置；
+    ②建一个java类，读取数据库配置文件.xml文件，导包dom4j-1.6.6.jar实现包，jaxen-1.1-beta-6.jar包，依赖包  
+        单例模式在构造方法中完成xml文件的读取，用到
+    SAXReader reader = new SAXReader()
+    InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(".xml文件")
+    Document doc = reader.read(in)
+    Element el = (Element)doc.selectObject("/drivername")通过doc文件首先拿到对应的子元素
+    String driver = el.getStringValue()通过元素获取内容
+   
+  5.再建一个DbConfig实体类
+    将driver,url,userName,password封装成私有的属性，在DbConifgReader类中，封装一个DbConfig类的私有属性，然后构造方法中，用DbConfig属性的set方法设置driver,url,userName,password
+    给DbConfig实例属性设置公共的get()方法，在DbUtil中，通过DbConfigReader.getInstance()获取实例，再用实例.getDbConfig()，就可以获取设置的4个属性
+    注意：static静态块，只执行一次，且只能执行静态属性和方法
+    
+  6.Model1模式：jsp+javaBean    Model2模式：jsp+servlet+javaBean，也就是MVC模式
+  
+  7.用户相关：给user_add.jsp页面设置表单验证，第一种可以用JS逻辑判断语句，第二种可以用正则表达式，用focus()得到聚集焦点，设置init()初始化方法，给第一次页面跳转设置焦点
+  
+  8.JS中的键盘事件，event.keyCode可以得到你按下的那一个键背后的ASCLL码，event.srcElement.type得到返回触发事件的元素的类型
+  
+  9.jsp中绝对路径，/开头，代表是tomcat的根，jsp的根是http://localhost:8080/，请求转发request.getRequestDispatcher()的根http://localhost:8080/工程名/，重定向response.sendRedirect()的根http://localhost:8080/
+  
+  10.用onblur("validateUserId(this.value)")方法，当失去焦点是时候，触发事件
+  
+  11.Ajax：异步提交机制（无刷新提交）
+    步骤：
+    ①变量 var xmlHttp
+    ②请求对象：区分浏览器是ie7以下，还是其他较新浏览器
+    function createXMLHttpRequest(){
+       if(window.ActiveXObject){
+          xmlHttp = new ActiveXObject("Microsoft.XMLHTTP");
+       }else if(window.XMLHttpRequest){
+          xmlHttp = new XMLHttpRequest();
+       }
+    }
+    
+    function validateUserId(userId){
+               实例化xmlHttp
+       createXMLHttpRequest();
+               指定哪个界面帮助完成相应的验证，加上time是为了实时刷新，消除缓存
+       xmlHttp.open("GET","validateUserId.jsp?id="+userId+"&time="+new Date().getTime(),true);
+       xmlHttp.send(null);发送请求
+       xmlHttp.onreadystatechange=function(){响应
+          if(xmlHttp.readyState==4){五步：0代表open，1代表send，2代表请求，3代表解析，4代表响应
+             if(xmlHttp.status==200){正常状态的时候
+                xmlHttp.responseText
+             }
+          }
+       }
+       
+    }
+    ③创建validateUserId.jsp页面，在UserManager数据库管理中，创建一个根据userId查询的方法，如果不为空，就代表已经有了此userId
+    
+   12.JS完成用户查询的全选功能：
+      关键代码：for(var i=0;i<selectFlag.length;i++){
+            selectFlag[i].checked = ifAll[0].checked;
+          }    
+    
+   13.PageModel分页显示，为了解决null显示在页面上的问题，用三元运算符，user.getContactTel()==null?"":user.getContactTel()
+   JS中显示上一页，下一页，首页，尾页都要添加一个参数window.self.location="user_maint.jsp?currentPage=<%=pm.getTotalPage()%>"
+   
+   14.修改用户，同一次有且只有一个可以被选中修改，判断有几个的复选框被选中，用到一个其他变量count来计数，当这一个被选中时，变量j来等于此时的for循环中的i，用selectFlag[j].value来传递参数
+   
+   15.删除用户，至少选择一个，js中readonly="true"属性表示只读不写
+   
+   16.在javabean的实体中符合命名规范的前提下，jsp页面用<jsp:useBean>自省机制，可以省略获取表单参数和设置javabean属性的代码
+   
+   17.在需要提交表单时，method用get方式会重写url，因为在提交的时候，填写的表单参数会附着在url后面一起提交，也就是重新拼接了参数，就带不了原有的cmd=modify的参数了，使用post方式提交，才不会重写url，才可以带cmd=modify，使用原来的请求url，不会自动的拼接参数
+   
+   18.java中必须以分号结束，js中可写可不写分号
+   
+   19.获取连接的时候以线程启动较合适，因为线程才有启动，关闭的功能，在UserManager中，最好不要把三大接口设置成成员变量，所有方法一起共享，应该一个方法，单独获取一条Connection，一个PreparedStatement，一个ResultSet
+   
+   20.删除用户的时候，不能删除root，语句为delete from t_user where user_id=? and user_id <> 'root'
+   
+   21.JS中确认与取消if(confirm("提示语句")){执行语句}，a标签用js方法<a href="javascript:mehtod"></a>
+   
+   22.登录界面的check，login.jsp中根据cmd=login来获取userId和password，成功登录用session来保存和设置对象user
+   
+   23.自定义异常，写一个class类，继承Exception异常或它的子类，重写其构造方法
+   
+   24.拼接字符串的方式，会出现sql注入，是不安全的方式，' or'1'='1
+      
+   25.批量删除不用for循环一个个删除的时候，用StringBuffer拼接语句
+      第一种：预处理语句
+   StringBuffer buffer = new StringBuffer("delete from t_user where user_id in (");
+   for(int i=0;i<userIds.length;i++){
+     buffer.append("?");
+     if(i<userIds.length-1){
+       buffer.append(",");
+     }
+   }  
+     
+   buffer.append(") and user_id <> 'root'")
+   ps = con.prepareStatement(buffer.toString())
+   for(int i=0;i<userIds.length;i++){
+     ps.setString(i+1,userIds[i])
+   }
+   
+      第二种：拼接字符串
+      只需手动改for(int i=0;i<userIds.length;i++){
+             buffer.append("'"+userIds[i]+"'")
+          }
+          
+      完毕后，在user_maint.jsp中，调用批处理方法就行
+     
+   26.在静态页面中，用div标签来嵌套，可以表示父子关系  
+      
+   27.eval()函数可以计算某个字符串，并执行其中的js代码，eval("var div=div"+id)可以动态的声明变量   
+   
+   28.三元运算符，结合display属性，可以来有效判断，显示不显示，div.style.display=div.style.display="block"?"none":"block"
+   
+   29.建一个ClientManager类，操作代理商或区域的业务逻辑类，获取数据的树形结构
+   
+   30.再建一个ClientTreeReader类，专门用于生成代理商或区域的属性结构的一个图，获取树形结构的根的语句select id,name,is_leaf,is_client from t_client where pid is null
+      用StringBuffer来拼接字符串和所有样式，如果当前的根不是叶子，有子节点，就判断if("N".equals(isLeaf)){}，设置level变量，表示是第几级子节点，创建一个方法findChildNodes(con,id,level)，把根的id作为子节点的pid继续查询
+      
+   31.在findChildNodes()中，利用递归查询，可以将不是叶子的子节点全部查询出来   
+   
+   32.代理商或者区域的实体类Client，因为client_level_id是外键关联t_data_dict，所以需要创建一个数据字典表的类，也就是代理商级别的管理类ClientLevel，因为后期要多次用到此表，所以用AbstractDataDict来封装，需要的话，extends继承就可以
+   
+   33.根据主键id来查询区域或代理商的详细信息，左外连接查询语句 select c.pid,c.client_level_id,c.name,d.name,c.client_id,c.bank_acct_no,c.contact_tel,c.address,c.Zip_code,c.is_leaf,c.is_client from t_client c left join t_data_dict d on c.client_level_id = d.id where c.id = ?
+   
+   34.防止空指针，尽量将id用url或隐藏表单域的方法，传递过去
+   
+   35.在修改代理商的时候，语句预防空指针异常，最好是if(client.getClientLevelId() != null){
+                                            ps.setString(2,client.getClientLevelId().getId());
+                                          }else{
+                                            ps.setString(2,null);
+                                          }
+                                          
+   36.根据类别category查询数据，用到类的反射机制，DataDict dataDict = Class.forName(类名.class.getName())
+   
+   37.程序员看到的是<option value="dataDict.getId()">，用户看到的是dataDict.getName()，用一个String变量selected来辅助，被选中的下拉列表项                                       
+   
+   第二周：
+   1.添加区域或代理商，将id作为参数附着在url后面，"client_node_add.jsp?id="+id，id作为添加代理商的pid，保存在隐藏域中，提交表单后，可以得到
+   
+   2.用IdGenerator类来生成id，使用到了一个表的主键，由另一个表t_table_id来维护自增长，每次获取了一个主键之后，根据表名再生成一个id+1，设置进t_table_id
+   
+   3.在DbUtil工具类中，设置手动开启事务con.setAutoCommit(false)，提交事务con.commit()，遇到异常回滚事务con.rollback()的方法
+   
+   4.在ClientManager中，创建一个添加的方法，内部实现上，同一个事务，同一条连接
+      实现步骤：
+      ①通过主键生成器IdGenerator，获取主键id，此刻是获取id，然后修改id，获取的时候要么用synchronized，要么用悲观锁for update，确保一次只执行一个操作，来保证线程的安全性
+      ②添加代理商或者区域的详细信息
+      ③判断父节点（用到getClientOrNodeById(int id)方法）是否是叶子，如果不是叶子，不用管
+      ④如果父节点是叶子，修改为不是叶子，用到modifyClientOrNodeIsLeaf(con,"N",pid)方法
+      
+      注意的是：因为非空字段必须填写，所以在添加区域，或添加代理商的时候，手动设置termi.setIsLeaf()和temri.setIsClient()为Y或N
+      
+   5.Ajax异步提交机制，根据代理商代码查询该代理商是否已经存在，这里的处理页面不是用jsp页面，而是用到servlet，这里就要注意到路径问题
+      相对路径：../servlet/validate?id=
+      绝对路径：basePath用到getContextPath()获取上下文，getScheme()获取协议，getServerName()获取服务器名称，getServerPort()获取端口号，这也就是当前项目的根，相当于http://localhost:8080/erp/，<%=basePath%>/servlet/validate?id=
+      使用EL表达式：${pageContext.request.contextPath}/servlet/validate?id=，相当于/erp/
+      
+   6.绝对路径下，路径要完整，直接写相对路径则不行，<%=basePath%>标签只对前端有效，在java中，在路径前一定要写上<%=basePath%>变量     
+   
+   7.删除代理商或区域，同一个事务，同一条连接
+      详细步骤：
+      ①首先获取id，去判断要删除的是代理商还是区域，如果是代理商，直接删除，用到is_client字段
+      ②判断的id如果是区域，还得判断自己是否有子节点，如果没有子节点，则直接删除，用is_leaf字段
+      ③如果有子节点，首先删除自己的子节点，递归删除
+      ④删除自己的所有子节点之后，然后删除自己，再去判断父节点是否还有其他子节点select count(*) from t_client where pid = ?，如果有的话，不用管
+      ⑤如果父节点没有子节点了，修改父节点为叶子，用到modifyClientOrNodeIsLeaf(con,"Y",pid)
+      
+    8.用filter过滤html,jsp等文件
+    <url-pattern>/*.html</url-pattern>  
+    <url-pattern>/*.jsp</url-pattern>
+      
+    9.模板方法模式，是一种基于子父类继承关系的代码复用技术，是一种类行为型模式，模板方法是具体方法，因此模板方法模式中的抽象层只能的抽象类abstract，而不是接口interface 
+        模板方法模式特点，将重复不变的部分放置在抽象父类中，然后让子类们去继承父类，然后重写父类的抽象方法，典型的就是HttpServlet中的service()
+        直接new出对象的方式，称为硬编码
+        
+    10.简单工厂模式：不需要每次都去new，是一种类创建型模式，特点是：抽象了对象创建的具体细节，创建的时候只需要用特定函数封装特点接口的创建细节，但是扩展性比较低；
+    
+    11.工厂方法模式，定义一个创建产品对象的工厂接口或抽象方法，让子类决定实例化哪一个类，可以不改动源代码，易于扩展
+    
+    12.Dao(Data Access Object 数据存取对象)模式，其实是利用组合工厂模式来解决问题的，并没有带来新的功能
+        位于业务逻辑和持久化数据之间，实现对持久化数据的访问
+        作用：隔离业务逻辑代码和数据访问代码，隔离不同数据库的实现    
+        组成部分：
+        ①Dao接口  ②Dao实现类  ③实体类  ④数据库连接和关闭工具类
+     
+    13.使用dom4j读取xml文件的标签时：
+    getName()：获取标签名称
+    getStringValue()：获取标签的值
+    getRootElement()：获取根标签
+    attributeValue()：在标签上获取属性值
+    
+    14.类中共有的一个变量，要么用static，要么放置在构造方法中，实例化的时候就创建
+    
+    15.request.getRequestDispatcher().forward()请求转发的根是应用的根(/工程/路径)
+       response.sendRedirect()重定向的根是tomcat的根(http://localhost:8080/工程/路径)
+       
+    16.对于物料代码是否重复的问题，要在同一个事务，同一条连接中，先查询后添加，将所有的异常交给servlet控制器来处理
+    
+    17.查询一个对象的方法，这里使用2次left join on连表查询
+    select t1.item_name,t1.spec,t1.pattern,t1.item_category_id,t2.name categoryName,t1.item_unit_id,t3.name unitName from t_items t1 left join t_data_dict t2 on t1.item_category_id = t2.id left join t_data_dict t3 on t1.item_unit_id = t3.id where t1.item_no = ?
+    
+    18.在子父类的关系中，子类抛出的异常必须和父类抛出的异常一致   
+        
+    19.除了自定义异常在代码内部抛出之外，还可以在web.xml文件中，配置专门用于处理异常的页面
+    ①用于处理自己定义的异常，在处理异常的页面的page指令中，一定要开启isErrorPage="true"，可以配置多个
+    <error-page>
+      <exception-type>异常类的具体路径</exception-type>
+      <location>/处理异常的页面</location>
+    </error-page>
+    
+    ②配置浏览器发生的错误代码，因为很多浏览器都是以ie浏览器为内核，ie浏览器内核已经自动配置了可能会发生的错误代码的处理信息，所以我们自己设定的时候，需要用到一个中转页面来配合完成，可以配置多个
+    <error-page>
+      <error-code>404,500等error code</error-code>
+      <location>/中转页面</location>
+    </error-page>
+    
+         在中转页面写上代码：
+     Integer errorCode = (Integer)request.getAttribute("javax.servlet.error.status_code");
+     
+     if(errorCode==404){
+     
+        response.sendRedirect("绝对路径或相对路径");
+        
+     }else if(errorCode==500){
+     
+        response.sendRedirect("绝对路径或相对路径");
+     }
+     
+     20.耦合度：MVC分层模式就是为了解耦，降低耦合度，易于开发和扩展
+     
+     21.粒度：越向上越粗略，越向下越细致，servlet中调用一个方法，在manager中往往需要几个方法配合使用
+     
+     22.实现分页查询和模糊查询，通用于一个方法，用到itemNoOrName这个从查询的文本框取得的参数
+     StringBuffer buffer = new StringBuffer("select t1.item_no,t1.item_name,t1.spec,t1.pattern,t2.name categoryName,t3.name unitName from t_items t1 left join t_data_dict t2 on t1.item_category.id=t2.id left join t_data_dict t3 on t1.item_unit_id=t3.id ")
+     if(itemNoOrName!=null&&!"".equals(itemNoOrName)){
+        buffer.append("where item_no like '%"+itemNoOrName+"%' or item-name like '%"+itemNoOrName+"%' ");
+     }
+     buffer.append("limit ?,?");
+          注意：like关键字后面如果是字符串类型，用单引号''，整型的话可以直接跟在后面，不需要''
+          再后面要得到totalCount总条数时，也需要将模糊查询的条件带进去
+          
+     23.在使用模糊查询的条件进行首位上下页的操作时，为了确保查询的有效性，需要在跳转的时候，带上参数clientIdOrName文本框的value值，并且在servlet中将获取的clientIdOrName值用request.setAttribute()方法保存起来，页面跳转的时候，随时可以获取
+     window.self.location="<%=basePath%>servlet/ItemFindAllServlet?currentPage=${pm.topPage}&clientIdOrName=${clientIdOrName}"
+     
+     24.配置全局范围内的参数，在web.xml中设置pageSize，具有比在servlet中设置的pageSize更高的优先级
+     web.xml中配置
+     <context-param>
+       <param-name>pageSize</param-name>
+       <param-value>5</param-value>
+     </context-param>
+     
+          在ItemFindAllServlet中设置web.xml的参数，需要用到init(ServletConfig config)方法
+          将int pageSize  = 3设置为成员变量
+     public void init(ServletConfig config){
+        
+        super.init(config);
+        
+                 此处的this.getServletContext()是代表的全局对象，相当于内置对象application
+        String num = this.getServletContext().getInitParameter("pageSize");
+        
+        if(num!=null&&!"".equals(num)){
+           pageSize = num;
+        }
+     }     
+     
+     25.物料部分的修改，首先在ItemModifyUIServlet中根据物料代码查询出item对象，然后再根据DataDictManager类中的方法，去获取物料类别和计量单位的List，最后3个对象都用request.setAttribute()保存起来
+          注意用<c:forEach>和<c:if>,<c:set>配合使用来获取selected属性
+          <c:forEach items="${categoryList}" var="category">
+            <c:if test="${item.itemCategoryId.id==category.id}">
+             <c:set var="selected" value="selected"/>
+               <option value="${category.id}" selected="${selected}">
+                  ${category.name}
+               </option>
+            </c:if>   
+            <c:if test="${item.itemmCategoryId.id!=category.id}">
+                 <option value="${category.id}">
+                  ${category.name}
+               </option>
+            </c:if>
+          </c:forEach>
+          
+     26.onsubmit方法提交表单，需要一个返回值true才可以正确提交，否则即使已经type="submit"也无法提交
+     
+     27.物料部分的删除，批量删除的方法
+     
+     28.图片上传步骤：单独是ItemUploadUIServlet中处理，下载组件的官网http://www.apache.org
+     ①导入需要的组件的jar包到项目的lib文件夹下，一个是fileupload的jar包，另一个是io的jar包    
+     ②当表单里有文件上传的时候，必须将method属性赋值为post，enctype属性赋值为multipart/form-data（不对字符编码，在使用包含文件上传控制的表单时，必须使用该值），默认类型是application/x-www.form-urlencoded（在发送前编码所有的字符），还有一个text/plain属性值（空格转为+，但是不对特殊字符编码）
+     ③在item_upload中保存一个隐藏域，用来保存的是itemNo（因为只有form表单中的控件才有提交功能，而表格没有）
+     ④获取itemNo，获取图片路径，这里因为是multipart/form-data属性值，所以不能用request.getParameter()获取参数
+     FileItemFactory factory = new DiskFileItemFactory();
+     ServletFileUpload upload = new ServletFileUpload(factory);
+           请求页面的表单数据存放在FileItem中，普通表单元素和文件上传元素
+     List<FileItem> items = upload.parseRequest(request);
+           迭代器
+     String itemNo = "";     
+     for(Iterator<FileItem> it = items.iterator();it.hasNext();){
+       
+       FileItem fileItem = it.next();
+       
+       if(fileItem.isFormField){
+               如果是普通的表单元素，也就是之前可以用getParameter()获取的表单元素
+          String name = fileItem.getFieldName();
+          String value = fileItem.getString();
+          if("itemNo".equals(name)){
+                            获取主键
+             itemNo = value;  
+          }
+       }else{
+              如果不是普通元素
+         String filedName = fileItem.getFiledName();
+         String fileName = fileItem.getName();
+                   截取字符串，得到图片的后缀类型
+         String hzName = fileName.substring(fileName.lastIndexOf('.'));
+        //  将图片写到指定目录
+        // File uploadedFile = new File("D:/"+itemNo+hzName);
+                   给服务器新建一个文件夹upload，将图片写到指定的服务器目录，首先获取服务器的根目录
+         String path = this.getServletContext().getRealPath("/");
+                    时间戳加随机数的形式，图片名不容易重复
+         String file = new Date().getTime()+new Random().nextInt(10000000)+hzName;
+         File uploadedFile = new File(path+"upload/"+file);
+                   写进去
+         fileItem.write(uploadedFile);         
+     
+       }
+     }
+     
+     ⑤修改物料的file_name字段
+     ⑥页面跳转的时候，要带上itemNo，显示的时候才知道是哪一个物料代码
+     
+         第三周：
+    1.单例模式中，如果不想在getInstance()方法添加synchronized关键字，也可以在方法内部添加synchronized块，始终保持在new一个实例的时候的排队概念，这样不影响同一个方法中其他属性的执行
+    if(instance==null){
+       synchronized(类名.class){
+           
+           instance = new 类名();
+       }
+    }
+    
+    2.重构物料部分，可以创建一个AbstractItemManger抽象类，里面是产生ItemManager实例的方法
+    AbstractItemManager继承HttpServlet后，所有继承它的子类，都自动拥有了间接父类HttpServlet的属性和方法
+        子类实现的时候，会先实现父类中的内容，再实现自己的部分
+        
+    3.用另一种在xml文件中配置的方法，替换dao工厂模式
+        新建bean-config.xml文件，在beans父标签下配置多个bean子标签，依据id唯一标识的名称和class具体类的路径属性来区分使用哪一个
+        用 dom4j组件获取，特别的是document.selectObject()获取的是一个集合类，循环遍历出每个元素，依据element.attribute()来获取属性id，后根据attribute.getValue()得到对应的class属性值  
+        键值对的形式保存在map中，方便外部的获取
+        
+    4.专门用于初始化的InitServlet，实现init(config)方法，与AbstractItemManager配合使用
+         在web.xml中配置ItemManager，然后在InitServlet中获取BeanFactory的实例，用this.getServletContext().setAttribute()保存实例，在AbstractItemManager中获取，用到this.getServletContext().getAttribute()获取实例
+         注意: 
+         假设一个servlet没有以url路径方式被调用，也没有被继承，就调用不到
+         这时候可以通过在web.xml配置的方式去实例化servlet，当servlet被加载的时候，就会自动被调用
+         在web.xml所需要的<servlet></servlet>中配置<load-on-startup>正整数</load-on-startup>  
+         这里的值必须是一个正整数，而且不同的servlet中，正整数越小，优先级越高，相同的话，顺序按照容器自己的方式执行
+         
+        流向单部分
+    5.js中，可以通过表名.insertRow(表名.rows.length)函数，表示往表格后面插入一行，行.insertCell()插入单元格
+    
+    6.创建流向单实体类，注意FlowCardMaster是主表，FlowCardDetail是详细信息的从表
+    
+    7.创建Dao和Manager类
+    ①在接口manager中的方法
+        分页查询findAll(int pageSize,int currentPage,String clientId,String beginDate,String endDate)
+        查询一个findFlowCardDetailById(String flowCardId)
+        添加流向单addFlowCardDetail(FlowCardMaster flowMaster)
+        修改流向单modifyFlowCardById(FlowCardMaster flowMaster)
+        删除流向单removeFlowCard(String[] flowCardIds)
+        送审流向单submitFlowCardList(String[] flowCardIds)
+         
+    ②在接口dao层创建的方法，因为粒度的问题，manager中一个方法的调用，需要dao层几个方法配合使用
+          添加的时候，先要添加FlowCardMaster主表中的信息，在考虑从表中的信息，需要自己维护流向单的主键
+          第一步，获取当前添加的流向单的主键（流向单号）
+          第二步，如果是第一笔单子，就以当前日期+"0001"作为单号
+          第三步，如果不是第一笔单子，就应该首先获取今天的做大单号，在此基础上加1作为主键
+          所以在dao层添加的时候，除了和manager中相同的方法之外，还需要多2个方法
+     generateFlowCardId()生成流向单号
+     addFlowCardMaster(FlowCardMaster flowMaster)
+     
+           删除的时候，先删除从表中的详细信息，然后再删除主信息，因为外键关联关系
+           需要多出1个方法
+     removeFlowCardMaster(String[] flowCardIds)
+     
+     ③web.xml中配置manager实现类，通过BeanFactory获取配置在web.xml中的信息，获取调用manager的实例
+     
+     8.ThreadLocal线程本地存储，位于java.lang包，可以作为一个容器，来存储连接，替换DbUtil的功能，可以在manager中，不手动传递Connection
+     get()：获取的方法
+     set()：设置的方法
+     remove()：移除的方法
+     
+     9.生成流向单号，模糊查询的方法，select max(flow_card_id) from t_flow_card_master where flow_card_id like '%"+当前日期+"%'
+              需要在结果集中，判断获取的最大的流向单号是不是为0，如果为0，就是这个单子是第一个流向单，否则直接最大的流向单号+1即可
+              将获取的流向单号设置给FlowCardMaster的id
+           
+     10.在addFlowCardMaster()中，实现添加t_flow_card_master前7个表的字段的方法
+     
+     11.在addFlowCardDetail()中，实现添加t_flow_card前4个字段和adjust_flag字段的方法，这里要注意，一个流向单号可能对应多个流向单，用到批量添加的方法，addBatch()，批量执行的方法，executeBatch()
+     
+     12.供方页面，使用ClientManager中findAllClient()，使用连表查询和StringBuffer拼接，来实现
+     
+     13.在js中，window对象，与onDblClick结合使用，可以将当前页面的属性赋值回打开本页面的页面
+     window.opener.document.all.cid.value=s1
+          如果是加入多行，需要在js方法中判断，用到页面的index来辨别
+     if(window.opener.document.all.aid.length>1){
+     
+         window.opener.document.all.aid[${index}].value=s1;
+         
+     14.添加的时候，供方代理商代码和需方客户代码不能相同
+     }       
+              
+     第四周：
+     
+     1.完成页面一系列的验证之后，就到FlowCardServlet里面，完成数据的添加
+          结构：实体类FlowCardMaster-->完成optType（默认的是流向单a）,fiscalYearPeriod（默认是会计核算表中的一个id），获取保存在flow_card_add.jsp中的隐藏域cid，还有recorderId（登陆者），optDate当前日期，状态录入vouSts（默认是N）
+          获取一个集合List<FlowCardDetail> flowList = new ArrayList<FlowCardDetail>()
+          用getParameterValues()获取aid,itemNo,qty，因为3个数组的长度相同，所以可以随便用一个来进行for循环
+          循环内，先获取FlowCardDetail的实例，然后设置aimClient,itemNo,optQty属性，注意这里的aimClient和itemNo分别是AimClient和Item实体类的引用类型
+          flowList.add(实例);
+         最后通过flowCardMaster.setFlowCardList(flowList)，将集合封装进流向单的主信息中
+         
+    2.在调用manager方法后，跳转的页面要带上可以区分路径的参数
+    
+    3.完成主页面的分页显示，这里隐藏的cid才是此页面查询获取的条件
+         查询语句：select t1.flow_card_id,t1.opt_date,t2.client_id,t2.name,t3.user_name from t_flow_card_master t1 left join t_client t2 on t1.client_id = t2.id left join t_user t3 on t1.recorder_id = t3.user_id where t1.opt_date between '开始日期' and '结束日期' and t1.vou_sts = 'N'
+         用if判断语句，看是否获取到了模糊查询的条件cid，用的话，用StringBuffer的append()添加进去
+         
+    4.查询总条数的时候，也需要将cid,beginDate,endDate条件传递进去     
+    
+    5.js中获取根路径的方法
+    //js中获取项目的根路径，获取的是当前网址
+	var curPath = window.document.location.href;
+	
+	alert(curPath);
+	
+	//获取主机地址之后的目录
+	var pathName = window.document.location.pathname;
+	
+	alert(pathName);
+	
+	var pos = curPath.indexOf(pathName);
+	
+	//获取主机地址
+	var localHostPath = curPath.substring(0,pos);
+	
+	alert(localHostPath);
+	
+	//获取带“/”的项目名,substring()包头不包尾，substr(1)表示从该字符串1索引的位置开始截取，indexOf('/')表示从字符串第1位后出现的第一个'/'，返回它的所在索引，后面要加1
+	//js中substring(a,b+1)和java中一样，表示从a开始截取，截取到b结束，需要加1,substr(a,len)表示从a位开始截取，需要截取多少位数
+	var projectName = pathName.substring(0,pathName.substr(1).indexOf('/')+1);
+	
+	alert(projectName);

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-module
+  type="WEB"
+  name="erp56"
+  id="myeclipse.1533451580646"
+  context-root="/erp56"
+  j2ee-spec="5.0"
+  archive="erp56.war">
+  <attributes>
+    <attribute name="webrootdir" value="WebRoot" />
+  </attributes>
+</project-module>
+

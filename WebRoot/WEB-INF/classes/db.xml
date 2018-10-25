@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<db-config>
+  <!-- 
+     .xml文件是可扩展标记语言
+           完成连接数据库信息的配置
+   -->
+   <drivername>com.mysql.jdbc.Driver</drivername>
+   <url>jdbc:mysql://localhost:3306/erp</url>
+   <username>root</username>
+   <password>1994</password>
+</db-config>
